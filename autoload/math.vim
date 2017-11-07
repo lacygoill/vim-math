@@ -173,14 +173,10 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " Yes, it's very common, even in math, but it's also confusing.
     " In math, a figure refers to a geometric shape.
     "}}}
-    " What is the number of significant digits in the result of a product?{{{
+    " RULE: The result of a product should have as many significant digits{{{
+    " as the number with the smallest amount of significant digits.
     "
     " The smallest  number of significant digits  of any number involved  in the
-    " initial calculation.
-    "}}}
-    " What is the number of significant digits in the result of a sum?{{{
-    "
-    " The number  of significant digits in  the smallest number involved  in the
     " initial calculation.
     "}}}
 
@@ -260,7 +256,9 @@ fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
         let sum = 1.0 * sum / a:cnt
     endif
 
-    " When you add  2 numbers in math, A  and B, A being accurate  to P1 decimal{{{
+    " RULE: The result of a sum should be as accurate as the least accurate number.{{{
+    "
+    " When you add  2 numbers in math, A  and B, A being accurate  to P1 decimal
     " places,  and B  to  P2 decimal  places,  the result  must  be accurate  to
     " min(P1,P2) decimal places.
     "
