@@ -25,7 +25,7 @@ fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
 
     call map(s:metrics, 's:prettify(v:val)')
     "                      │
-    "                      └─ • compact notation for big/small numbers
+    "                      └─ • compact (≈ scientific) notation for big/small numbers
     "                         • remove possible ending `.0`
 endfu
 
