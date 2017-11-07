@@ -159,7 +159,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " Don't use the expression “significant  figures“.{{{
     " Yes, it's very common, even in math, but it's also confusing.
     " In math, a figure refers to a geometric shape.
-"}}}
+    "}}}
     " What is the number of significant digits in the result of a product?{{{
     "
     " The smallest  number of significant digits  of any number involved  in the
@@ -257,7 +257,7 @@ fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     "
     "         avg(1.2, 3.45) = 2.325    ✘
     "         avg(1.2, 3.45) = 2.3      ✔
-"}}}
+    "}}}
     let decimal_places = min(map(copy(a:raw_numbers),
     \                            'strlen(matchstr(v:val, ''\.\zs\d\+$''))')
     \                        +[10])
