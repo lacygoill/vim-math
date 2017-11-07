@@ -27,7 +27,6 @@ fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
     "                      │
     "                      └─ • compact notation for big/small numbers
     "                         • remove possible ending `.0`
-
 endfu
 
 fu! s:extract_data() abort "{{{1
@@ -120,6 +119,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " What are significant digits?{{{
     "
     "         http://mathworld.wolfram.com/SignificantDigits.html
+    "         https://en.wikipedia.org/wiki/Significant_figures#Concise_rules
     "
     " The significant digits of a number are the digits necessary to express the
     " latter within the uncertainty of calculation.
@@ -140,21 +140,34 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " A `0` can be significant or not, depending on its position in the number:
     "
     "         • in a sequence of 0's at the beginning:    NOT significant
+    "
     "         • somewhere between 2 non-zero digits:          significant
-    "         • in a sequence of 0's at the end:          depends on the context
+    "
+    "         • in a sequence of 0's at the end
+    "           of a number WITH a decimal point:             significant
+    "
+    "         • in a sequence of 0's at the end
+    "           of a number WITHOUT a decimal point:      need more info
     "}}}
     " NO zero in a sequence of 0's at the beginning of a number can be significant.{{{
     " Even if it's after the decimal point.
     "
     " Why?
-    " Because it doesn't  help you to position the number  on a ruler.  Instead,
+    " Because it doesn't help you to position the number on the ruler.  Instead,
     " it merely helps you to choose the right ruler (i.e. with the right unit).
     "}}}
-    " How does the context help to determine whether a 0 at the end of a number is significant?{{{
+    " How does more info help to determine whether a 0 at the end of a number is significant?{{{
     "
-    " It  can  give  information  relative  to the  precision  of  the  measured
-    " quantity.  A 0 which gives to the  number an accuracy greater than the one
-    " specified by the context can NOT be significant.
+    " Additional info can specify the accuracy of the number.
+    " A `0` which gives to the number an accuracy greater than the one specified
+    " by this info is NOT significant.
+    "
+    "         1300
+    "           └┤
+    "            └ without additional info, you don't know whether these are significant:
+    "
+    "                  • they are     , if the measure is accurate to      1         unit
+    "                  • they are not , if the measure is accurate to only 10 or 100 units
     "}}}
     " Don't use the expression “significant  figures“.{{{
     " Yes, it's very common, even in math, but it's also confusing.
@@ -170,6 +183,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " The number  of significant digits in  the smallest number involved  in the
     " initial calculation.
     "}}}
+
     let significant_digits = min(map(copy(a:raw_numbers),
     \                                'strlen(substitute(v:val, ''\v^0+|\.|-'', "", "g"))')
     \                            +[10])
