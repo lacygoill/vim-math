@@ -132,7 +132,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " My_definition:
     " They  are the digits  which allow you to  position the number  on the
     " “right“ ruler. What is a right ruler?
-    " A ruler, such as the unit allows you to express the number as an integer,
+    " A  ruler, whose  unit allows  you  to express  the number  as an  integer,
     " without any 0 at the end.
     "
     " Non-zero digits (1-9) are always significant.
