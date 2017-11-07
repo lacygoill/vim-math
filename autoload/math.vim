@@ -113,16 +113,16 @@ fu! s:prettify(number) abort "{{{1
 endfu
 
 fu! s:product(cnt, raw_numbers) abort "{{{1
-    let fractions = filter(copy(a:raw_numbers), 'v:val =~# "[.]"')
-    let integers  = filter(copy(a:raw_numbers), 'v:val !~# "[.]"')
+    let floats   = filter(copy(a:raw_numbers), 'v:val =~# "[.]"')
+    let integers = filter(copy(a:raw_numbers), 'v:val !~# "[.]"')
 
     " if there's only integers, no need to process the product
     " compute and return immediately
-    if empty(fractions)
+    if empty(floats)
         return eval(a:cnt ? join(a:raw_numbers, ' * ') : '0')
     endif
 
-    "     ┌─ used to compute the product of integers and fractions separately
+    "     ┌─ used to compute the product of integers and floats separately
     "     │
     let l:Partial_product = { numbers ->
     \                                    eval(
@@ -134,8 +134,8 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     \                                        )
     \                       }
 
-    let integers_product  = l:Partial_product(integers)
-    let fractions_product = l:Partial_product(fractions)
+    let integers_product = l:Partial_product(integers)
+    let floats_product   = l:Partial_product(floats)
 
     " What are significant digits?{{{
     "
@@ -208,28 +208,28 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " affected by the rule, not integers…
     "}}}
 
-    let significant_digits = min(map(fractions,
+    let significant_digits = min(map(floats,
     \                                'strlen(substitute(v:val, ''\v^0+|[.+-]'', "", "g"))')
     \                            +[10])
     "                              │
     "                              └─ never go above 10 significant digits
 
-    let fractions_product = significant_digits > 0
-    \?                          printf('%.*f', significant_digits, fractions_product)
-    \:                          string(fractions_product)
+    let floats_product = significant_digits > 0
+    \?                          printf('%.*f', significant_digits, floats_product)
+    \:                          string(floats_product)
 
-    let fractions_product = split(fractions_product, '\zs')
+    let floats_product = split(floats_product, '\zs')
     let i = 0
-    for char in fractions_product
+    for char in floats_product
         if char !=# '-' && char !=# '.'
             let significant_digits -= 1
             if significant_digits < 0
-                let fractions_product[i] = '0'
+                let floats_product[i] = '0'
             endif
         endif
         let i += 1
     endfor
-    return string(eval(join(fractions_product, '')) * integers_product)
+    return string(eval(join(floats_product, '')) * integers_product)
 endfu
 
 fu! math#put_metrics() abort "{{{1
