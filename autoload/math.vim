@@ -216,6 +216,7 @@ fu! math#put_metrics() abort "{{{1
             return 'echo "no metrics"'
         endif
 
+        call feedkeys('1', 'int')
         let choice = inputlist([ 'Metrics',
         \                        '1. all',
         \                        '2. sum',
