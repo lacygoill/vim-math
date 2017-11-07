@@ -105,8 +105,7 @@ fu! s:prettify(number) abort "{{{1
     "                                          └────┤
     "                                               └ remove possible ending `.0`
     "
-    "                                                 `%g` already removes non-significant zero(s),
-    "                                                 but NOT if there's only one:
+    "                                                 `%g` does NOT remove it:
     "
     "                                                         123.0
     "
