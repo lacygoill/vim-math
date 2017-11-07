@@ -113,7 +113,29 @@ fu! s:prettify(number) abort "{{{1
 endfu
 
 fu! s:product(cnt, raw_numbers) abort "{{{1
-    let product = eval(a:cnt ? join(a:raw_numbers, ' * ') : '0')
+    let fractions = filter(copy(a:raw_numbers), 'v:val =~# "[.]"')
+    let integers  = filter(copy(a:raw_numbers), 'v:val !~# "[.]"')
+
+    " if there's only integers, no need to process the product
+    " compute and return immediately
+    if empty(fractions)
+        return eval(a:cnt ? join(a:raw_numbers, ' * ') : '0')
+    endif
+
+    "     ┌─ used to compute the product of integers and fractions separately
+    "     │
+    let l:Partial_product = { numbers ->
+    \                                    eval(
+    \                                            len(numbers) == 0
+    \                                          ?     '1'
+    \                                          : len(numbers) == 1
+    \                                          ?     numbers[0]
+    \                                          : join(numbers, ' * ')
+    \                                        )
+    \                       }
+
+    let integers_product  = l:Partial_product(integers)
+    let fractions_product = l:Partial_product(fractions)
 
     " What are significant digits?{{{
     "
@@ -175,35 +197,39 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " RULE: The result of a product should have as many significant digits{{{
     " as the number with the smallest amount of significant digits.
     "}}}
+    " Exception: With integers, the rule can lead to a weird result.{{{
+    "
+    " If I follow it, then here's what should be the result of this calculation:
+    "
+    "       2 * 2 * 2 * 2 = 20
+    "
+    " The result could not be `16`, because the latter has 2 significant digits,
+    " whereas  all our  numbers  have  only 1.   I  suppose  only fractions  are
+    " affected by the rule, not integers…
+    "}}}
 
-    let significant_digits = min(map(copy(a:raw_numbers),
+    let significant_digits = min(map(fractions,
     \                                'strlen(substitute(v:val, ''\v^0+|[.+-]'', "", "g"))')
     \                            +[10])
     "                              │
     "                              └─ never go above 10 significant digits
 
-    let product = significant_digits > 0
-    \?                printf('%.*f', significant_digits, product)
-    \:                string(product)
+    let fractions_product = significant_digits > 0
+    \?                          printf('%.*f', significant_digits, fractions_product)
+    \:                          string(fractions_product)
 
-    let product = split(product, '\zs')
+    let fractions_product = split(fractions_product, '\zs')
     let i = 0
-    for char in product
+    for char in fractions_product
         if char !=# '-' && char !=# '.'
             let significant_digits -= 1
             if significant_digits < 0
-                let product[i] = '0'
+                let fractions_product[i] = '0'
             endif
         endif
         let i += 1
     endfor
-    return join(product, '')
-
-    " Alternative:
-    "         let n = significant_digits + (match(product,'-') != -1) + (match(product,'\.') != -1)
-    "         return matchstr(product, '^-')
-    "         \     .matchstr(product, '[0-9]\{'.significant_digits.'}')
-    "         \     .substitute(matchstr(product, '[0-9]\{'.significant_digits.'}\zs.*'), '[^-.]', '0', 'g')
+    return string(eval(join(fractions_product, '')) * integers_product)
 endfu
 
 fu! math#put_metrics() abort "{{{1
@@ -276,5 +302,5 @@ fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
 
     return decimal_places > 0
     \?         printf('%.*f', decimal_places, sum)
-    \:         string(sum)
+    \:         printf('%d', float2nr(round(sum)))
 endfu
