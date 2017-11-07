@@ -174,9 +174,6 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     "}}}
     " RULE: The result of a product should have as many significant digits{{{
     " as the number with the smallest amount of significant digits.
-    "
-    " The smallest  number of significant digits  of any number involved  in the
-    " initial calculation.
     "}}}
 
     let significant_digits = min(map(copy(a:raw_numbers),
