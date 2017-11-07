@@ -25,7 +25,7 @@ fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
 
     call map(s:metrics, 's:prettify(v:val)')
     "                      │
-    "                      └─ • compact (≈ scientific) notation for big/small numbers
+    "                      └─ • scientific notation for big/small numbers
     "                         • remove possible ending `.0`
 endfu
 
@@ -99,7 +99,7 @@ fu! math#op(type, ...) abort "{{{1
 endfu
 
 fu! s:prettify(number) abort "{{{1
-    "                          ┌ use notation with exponent, if the number is too big/small
+    "                          ┌ use scientific notation if the number is too big/small
     "                         ┌┤
     return substitute(printf('%g', a:number), '\.0\+$', '', '')
     "                                          └────┤
@@ -177,7 +177,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     "}}}
 
     let significant_digits = min(map(copy(a:raw_numbers),
-    \                                'strlen(substitute(v:val, ''\v^0+|\.|-'', "", "g"))')
+    \                                'strlen(substitute(v:val, ''\v^0+|[.+-]'', "", "g"))')
     \                            +[10])
     "                              │
     "                              └─ never go above 10 significant digits
@@ -225,12 +225,13 @@ fu! math#put_metrics() abort "{{{1
             let metrics = [ 'sum', 'avg', 'prod', 'min', 'max', 'count' ][choice - 2]
             let output  = s:metrics[metrics]
         elseif choice == 1
-            let output = 'sum: '  .s:metrics.sum   .'   '
-            \           .'avg: '  .s:metrics.avg   .'   '
-            \           .'prod: ' .s:metrics.prod  .'   '
-            \           .'min: '  .s:metrics.min   .'   '
-            \           .'max: '  .s:metrics.max   .'   '
-            \           .'count: '.s:metrics.count
+            let output = printf('sum: %s   avg: %s   prod: %s   min: %s   max: %s   count: %s',
+            \                    s:metrics.sum,
+            \                    s:metrics.avg,
+            \                    s:metrics.prod,
+            \                    s:metrics.min,
+            \                    s:metrics.max,
+            \                    s:metrics.count)
         else
             return ''
         endif
