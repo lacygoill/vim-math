@@ -6,7 +6,13 @@ let g:autoloaded_math = 1
 fu! s:analyse() abort "{{{1
     let [ raw_numbers, numbers ] = s:extract_data()
     call s:calculate_metrics(raw_numbers, numbers)
-    call s:report()
+    " The cursor may be moved to another line when we use the operator.
+    " When that  happens, it may cause  a redraw, especially when  we repeat the
+    " operator with the dot command.
+    "
+    " A redraw will erase the message, so we delay the report to be sure it will
+    " always be visible.
+    call timer_start(0, {-> s:report()})
 endfu
 
 fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
@@ -222,10 +228,14 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     let i = 0
     for char in floats_product
         if char !=# '-' && char !=# '.'
-            let significant_digits -= 1
-            if significant_digits < 0
+            if significant_digits == 1
+                let floats_product[i] = string(eval(floats_product[i])+(get(floats_product, i+1, 0) <= 4
+                \                                                       ?    0
+                \                                                       :    1))
+            elseif significant_digits <= 0
                 let floats_product[i] = '0'
             endif
+            let significant_digits -= 1
         endif
         let i += 1
     endfor
