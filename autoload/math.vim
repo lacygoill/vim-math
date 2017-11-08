@@ -296,7 +296,7 @@ endfu
 fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     let sum = eval(a:cnt ? join(a:raw_numbers, ' + ') : '0')
     if a:avg
-        let sum = 1.0 * sum / a:cnt
+        let sum = (a:cnt != 0 ? 1.0 * sum / a:cnt : 0)
     endif
 
     " RULE: The result of a sum should be as accurate as the least accurate number.{{{
