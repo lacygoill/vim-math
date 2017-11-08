@@ -229,6 +229,12 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     for char in floats_product
         if char !=# '-' && char !=# '.'
             if significant_digits == 1
+                " If the next digit after  the last significant digit is greater
+                " than 4, round it up. As an  example, suppose we have a product
+                " with 3 significant digits:
+                "
+                "       1.232    →    1.23
+                "       1.238    →    1.24
                 let floats_product[i] = string(eval(floats_product[i])+(get(floats_product, i+1, 0) <= 4
                 \                                                       ?    0
                 \                                                       :    1))
