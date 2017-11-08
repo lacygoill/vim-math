@@ -65,7 +65,6 @@ fu! s:get_num_pat() abort "{{{1
 endfu
 
 let s:num_pat = s:get_num_pat()
-let g:num_pat = deepcopy(s:num_pat)
 
 fu! math#op(type, ...) abort "{{{1
     let cb_save  = &cb
