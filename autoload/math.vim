@@ -12,7 +12,7 @@ fu! s:analyse() abort "{{{1
     "
     " A redraw will erase the message, so we delay the report to be sure it will
     " always be visible.
-    call timer_start(0, {-> s:report()})
+    call timer_start(0, { -> s:report() })
 endfu
 
 fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
@@ -130,8 +130,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
 
     "     ┌─ used to compute the product of integers and floats separately
     "     │
-    let l:Partial_product = { numbers ->
-    \                                    eval(
+    let l:Partial_product = { numbers -> eval(
     \                                            len(numbers) == 0
     \                                          ?     '1'
     \                                          : len(numbers) == 1
