@@ -233,8 +233,12 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
                 " than 4, round it up. As an  example, suppose we have a product
                 " with 3 significant digits:
                 "
+                "           ┌─ smaller than 4
+                "           │
                 "       1.232    →    1.23
                 "       1.238    →    1.24
+                "           │
+                "           └─ greater than 4
                 let floats_product[i] = string(eval(floats_product[i])+(get(floats_product, i+1, 0) <= 4
                 \                                                       ?    0
                 \                                                       :    1))
