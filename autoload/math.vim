@@ -80,7 +80,7 @@ fu! math#op(type, ...) abort "{{{1
             sil norm! '[V']y
         elseif a:type ==# 'block'
             sil exe "norm! `[\<c-v>`]y"
-        elseif index(['v', 'V', "\<c-v>"], a:type) != -1
+        elseif index(['v', 'V', "\<c-v>"], a:type) >= 0
             sil norm! gvy
         elseif a:type ==# 'Ex'
             sil exe a:1.','.a:2.'y'
@@ -89,7 +89,7 @@ fu! math#op(type, ...) abort "{{{1
         endif
         call s:analyse()
     catch
-        if index(['char', 'line', 'block'], a:type) != -1
+        if index(['char', 'line', 'block'], a:type) >= 0
             echohl ErrorMsg
             echom v:exception
             echohl NONE
@@ -227,7 +227,9 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     let i = 0
     for char in floats_product
         if char !=# '-' && char !=# '.'
-            if significant_digits == 1
+            if significant_digits <= 0
+                let floats_product[i] = '0'
+            elseif significant_digits == 1
                 " If the next digit after  the last significant digit is greater
                 " than 4, round it up. As an  example, suppose we have a product
                 " with 3 significant digits:
@@ -241,8 +243,6 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
                 let floats_product[i] = string(eval(floats_product[i])+(get(floats_product, i+1, 0) <= 4
                 \                                                       ?    0
                 \                                                       :    1))
-            elseif significant_digits <= 0
-                let floats_product[i] = '0'
             endif
             let significant_digits -= 1
         endif
