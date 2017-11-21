@@ -80,7 +80,7 @@ fu! math#op(type, ...) abort "{{{1
             sil norm! '[V']y
         elseif a:type ==# 'block'
             sil exe "norm! `[\<c-v>`]y"
-        elseif index(['v', 'V', "\<c-v>"], a:type) >= 0
+        elseif a:type ==# 'vis'
             sil norm! gvy
         elseif a:type ==# 'Ex'
             sil exe a:1.','.a:2.'y'
