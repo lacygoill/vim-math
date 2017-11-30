@@ -29,21 +29,21 @@ fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
     \                 'count' : cnt,
     \               }
 
-    call map(s:metrics, 's:prettify(v:val)')
-    "                      │
-    "                      └─ • scientific notation for big/small numbers
-    "                         • remove possible ending `.0`
+    call map(s:metrics, { k,v -> s:prettify(v) })
+    "                              │
+    "                              └─ • scientific notation for big/small numbers
+    "                                 • remove possible ending `.0`
 endfu
 
 fu! s:extract_data() abort "{{{1
     let selection = getreg('"')
     "                                       ┌─ default 2nd argument = \_s\+
     "                                       │
-    let raw_numbers = filter(split(selection), 'v:val =~# s:num_pat')
-    let numbers     = map(copy(raw_numbers), 'str2float(v:val)')
-    "                                         │
-    "                                         └─ Vim's default coercion is good enough for integers
-    "                                            but not for floats:
+    let raw_numbers = filter(split(selection), { k,v -> v =~# s:num_pat })
+    let numbers     = map(copy(raw_numbers), { k,v -> str2float(v) })
+    "                                                 │
+    "                                                 └─ Vim's default coercion is good enough for integers
+    "                                                    but not for floats:
     "
     "                                                    echo '12' + 3
     "                                                    → 15    ✔
@@ -119,8 +119,8 @@ fu! s:prettify(number) abort "{{{1
 endfu
 
 fu! s:product(cnt, raw_numbers) abort "{{{1
-    let floats   = filter(copy(a:raw_numbers), 'v:val =~# "[.]"')
-    let integers = filter(copy(a:raw_numbers), 'v:val !~# "[.]"')
+    let floats   = filter(copy(a:raw_numbers), { k,v -> v =~# '[.]' })
+    let integers = filter(copy(a:raw_numbers), { k,v -> v !~# '[.]' })
 
     " if there's only integers, no need to process the product
     " compute and return immediately
@@ -214,7 +214,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     "}}}
 
     let significant_digits = min(map(floats,
-    \                                'strlen(substitute(v:val, ''\v^0+|[.+-]'', "", "g"))')
+    \                                { k,v -> strlen(substitute(v, '\v^0+|[.+-]', '', 'g')) })
     \                            +[10])
     "                              │
     "                              └─ never go above 10 significant digits
@@ -314,7 +314,7 @@ fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     "         avg(1.2, 3.45) = 2.3      ✔
     "}}}
     let decimal_places = min(map(copy(a:raw_numbers),
-    \                            'strlen(matchstr(v:val, ''\.\zs\d\+$''))')
+    \                            { k,v -> strlen(matchstr(v, '\.\zs\d\+$')) })
     \                        +[10])
     "                          │
     "                          └─ never go above 10 digits after the decimal point
