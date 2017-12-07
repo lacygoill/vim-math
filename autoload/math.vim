@@ -282,7 +282,9 @@ fu! math#put_metrics() abort "{{{1
         endif
         put =output
     catch
-        return 'echoerr '.string(v:exception)
+        exe get(g:, 'my_verbose_errors', 0)
+        \?        'echoerr '.string(v:exception)
+        \:        'return '.string('echoerr '.string(v:exception))
     endtry
     return ''
 endfu
