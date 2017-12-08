@@ -89,13 +89,7 @@ fu! math#op(type, ...) abort "{{{1
         endif
         call s:analyse()
     catch
-        if index(['char', 'line', 'block'], a:type) >= 0
-            echohl ErrorMsg
-            echom v:exception
-            echohl NONE
-        else
-            call my_lib#catch_error()
-        endif
+        return my_lib#catch_error()
     finally
         let &cb  = cb_save
         let &sel = sel_save
@@ -281,7 +275,7 @@ fu! math#put_metrics() abort "{{{1
         endif
         put =output
     catch
-        call my_lib#catch_error()
+        return my_lib#catch_error()
     endtry
 endfu
 
