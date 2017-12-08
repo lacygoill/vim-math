@@ -94,14 +94,13 @@ fu! math#op(type, ...) abort "{{{1
             echom v:exception
             echohl NONE
         else
-            return 'echoerr '.string(v:exception)
+            call my_lib#catch_error()
         endif
     finally
         let &cb  = cb_save
         let &sel = sel_save
         call setreg('"', reg_save[0], reg_save[1])
     endtry
-    return ''
 endfu
 
 fu! s:prettify(number) abort "{{{1
@@ -282,11 +281,8 @@ fu! math#put_metrics() abort "{{{1
         endif
         put =output
     catch
-        exe get(g:, 'my_verbose_errors', 0)
-        \?        'echoerr '.string(v:exception)
-        \:        'return '.string('echoerr '.string(v:exception))
+        call my_lib#catch_error()
     endtry
-    return ''
 endfu
 
 fu! s:report() abort "{{{1

@@ -15,12 +15,12 @@ let g:loaded_math = 1
 
 " Command {{{1
 
-com! -bar -range AnalyseNumbers exe math#op('Ex', <line1>, <line2>)
+com! -bar -range AnalyseNumbers call math#op('Ex', <line1>, <line2>)
 
 " Mappings {{{1
 
 nno  <silent><unique>  +m   :<c-u>set opfunc=math#op<cr>g@
 nno  <silent><unique>  +mm  :<c-u>set opfunc=math#op<bar>exe 'norm! '.v:count1.'g@_'<cr>
-xno  <silent><unique>  +m   :<c-u>exe math#op('vis')<cr>
+xno  <silent><unique>  +m   :<c-u>call math#op('vis')<cr>
 
-nno  <silent><unique>  "?   :<c-u>exe math#put_metrics()<cr>
+nno  <silent><unique>  "?   :<c-u>call math#put_metrics()<cr>
