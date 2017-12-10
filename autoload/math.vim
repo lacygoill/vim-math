@@ -1,8 +1,3 @@
-if exists('g:autoloaded_math')
-    finish
-endif
-let g:autoloaded_math = 1
-
 fu! s:analyse() abort "{{{1
     let [ raw_numbers, numbers ] = s:extract_data()
     call s:calculate_metrics(raw_numbers, numbers)
