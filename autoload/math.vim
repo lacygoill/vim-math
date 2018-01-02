@@ -19,8 +19,8 @@ fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
     \                 'sum'   : str2float(s:sum_or_avg(cnt, raw_numbers, 0)),
     \                 'avg'   : str2float(s:sum_or_avg(cnt, raw_numbers, 1)),
     \                 'prod'  : str2float(s:product(cnt, raw_numbers)),
-    \                 'min'   : my_lib#min(numbers),
-    \                 'max'   : my_lib#max(numbers),
+    \                 'min'   : lg#math#min(numbers),
+    \                 'max'   : lg#math#max(numbers),
     \                 'count' : cnt,
     \               }
 
@@ -84,7 +84,7 @@ fu! math#op(type, ...) abort "{{{1
         endif
         call s:analyse()
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     finally
         let &cb  = cb_save
         let &sel = sel_save
@@ -270,7 +270,7 @@ fu! math#put_metrics() abort "{{{1
         endif
         put =output
     catch
-        return my_lib#catch_error()
+        return lg#catch_error()
     endtry
 endfu
 
