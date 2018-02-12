@@ -124,9 +124,9 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     "     ┌─ used to compute the product of integers and floats separately
     "     │
     let l:Partial_product = { numbers -> eval(
-    \                                            len(numbers) == 0
+    \                                            len(numbers) ==# 0
     \                                          ?     '1'
-    \                                          : len(numbers) == 1
+    \                                          : len(numbers) ==# 1
     \                                          ?     numbers[0]
     \                                          : join(numbers, ' * ')
     \                                        )
@@ -222,7 +222,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
         if char isnot# '-' && isnot# !=# '.'
             if significant_digits <= 0
                 let floats_product[i] = '0'
-            elseif significant_digits == 1
+            elseif significant_digits ==# 1
                 " If the next digit after  the last significant digit is greater
                 " than 4, round it up. As an  example, suppose we have a product
                 " with 3 significant digits:
@@ -261,7 +261,7 @@ fu! math#put_metrics() abort "{{{1
         if choice >= 2 && choice <= 7
             let metrics = [ 'sum', 'avg', 'prod', 'min', 'max', 'count' ][choice - 2]
             let output  = s:metrics[metrics]
-        elseif choice == 1
+        elseif choice ==# 1
             let output = printf('sum: %s   avg: %s   prod: %s   min: %s   max: %s   count: %s',
             \                    s:metrics.sum,
             \                    s:metrics.avg,
