@@ -219,7 +219,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     let floats_product = split(floats_product, '\zs')
     let i = 0
     for char in floats_product
-        if char !=# '-' && char !=# '.'
+        if char isnot# '-' && isnot# !=# '.'
             if significant_digits <= 0
                 let floats_product[i] = '0'
             elseif significant_digits == 1
