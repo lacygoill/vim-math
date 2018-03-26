@@ -213,8 +213,8 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     "                              └─ never go above 10 significant digits
 
     let floats_product = significant_digits > 0
-    \?                          printf('%.*f', significant_digits, floats_product)
-    \:                          string(floats_product)
+                     \ ?        printf('%.*f', significant_digits, floats_product)
+                     \ :        string(floats_product)
 
     let floats_product = split(floats_product, '\zs')
     let i = 0
@@ -311,6 +311,6 @@ fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     "                          └─ never go above 10 digits after the decimal point
 
     return decimal_places > 0
-    \?         printf('%.*f', decimal_places, sum)
-    \:         printf('%d', float2nr(round(sum)))
+       \ ?     printf('%.*f', decimal_places, sum)
+       \ :     printf('%d', float2nr(round(sum)))
 endfu
