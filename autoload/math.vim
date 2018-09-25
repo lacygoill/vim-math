@@ -4,7 +4,7 @@ endif
 let g:autoloaded_math = 1
 
 fu! s:analyse() abort "{{{1
-    let [ raw_numbers, numbers ] = s:extract_data()
+    let [raw_numbers, numbers] = s:extract_data()
     call s:calculate_metrics(raw_numbers, numbers)
     " The cursor may be moved to another line when we use the operator.
     " When that  happens, it may cause  a redraw, especially when  we repeat the
@@ -16,7 +16,7 @@ fu! s:analyse() abort "{{{1
 endfu
 
 fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
-    let [ raw_numbers, numbers ] = [ a:raw_numbers, a:numbers ]
+    let [raw_numbers, numbers] = [a:raw_numbers, a:numbers]
 
     let cnt = len(numbers)
 
@@ -53,7 +53,7 @@ fu! s:extract_data() abort "{{{1
     "
     "                                            … so we need to call `str2float()` to perform the right
     "                                            conversion, from a string to the float it contains.
-    return [ raw_numbers, numbers ]
+    return [raw_numbers, numbers]
 endfu
 
 fu! s:get_num_pat() abort "{{{1
@@ -69,7 +69,7 @@ let s:num_pat = s:get_num_pat()
 fu! math#op(type, ...) abort "{{{1
     let cb_save  = &cb
     let sel_save = &selection
-    let reg_save = [ '"', getreg('"'), getregtype('"') ]
+    let reg_save = ['"', getreg('"'), getregtype('"')]
     try
         set cb-=unnamed cb-=unnamedplus
         set selection=inclusive
@@ -250,16 +250,16 @@ fu! math#put_metrics() abort "{{{1
             return 'echo "no metrics"'
         endif
 
-        let choice = inputlist([ 'Metrics',
-        \                        '1. all',
-        \                        '2. sum',
-        \                        '3. avg',
-        \                        '4. prod',
-        \                        '5. min',
-        \                        '6. max',
-        \                        '7. count' ])
+        let choice = inputlist(['Metrics',
+        \                       '1. all',
+        \                       '2. sum',
+        \                       '3. avg',
+        \                       '4. prod',
+        \                       '5. min',
+        \                       '6. max',
+        \                       '7. count'])
         if choice >= 2 && choice <= 7
-            let metrics = [ 'sum', 'avg', 'prod', 'min', 'max', 'count' ][choice - 2]
+            let metrics = ['sum', 'avg', 'prod', 'min', 'max', 'count'][choice - 2]
             let output  = s:metrics[metrics]
         elseif choice ==# 1
             let output = printf('sum: %s   avg: %s   prod: %s   min: %s   max: %s   count: %s',
@@ -279,7 +279,7 @@ fu! math#put_metrics() abort "{{{1
 endfu
 
 fu! s:report() abort "{{{1
-    for a_metrics in [ 'sum', 'avg', 'prod', 'min', 'max', 'count'  ]
+    for a_metrics in ['sum', 'avg', 'prod', 'min', 'max', 'count']
         echon printf('%s: %s   ', a_metrics, s:metrics[a_metrics])
     endfor
 endfu
