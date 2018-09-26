@@ -272,7 +272,7 @@ fu! math#put_metrics() abort "{{{1
         else
             return ''
         endif
-        put =output
+        call append('.', output)
     catch
         return lg#catch_error()
     endtry
