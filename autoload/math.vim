@@ -46,10 +46,10 @@ fu! s:extract_data() abort "{{{1
     "                                                    but not for floats:
     "
     "                                                    echo '12' + 3
-    "                                                    → 15    ✔
+    "                                                    15    ✔~
     "
     "                                                    echo '1.2' + 3
-    "                                                    → 4     ✘
+    "                                                    4     ✘~
     "
     "                                            … so we need to call `str2float()` to perform the right
     "                                            conversion, from a string to the float it contains.
