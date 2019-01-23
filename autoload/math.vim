@@ -31,8 +31,8 @@ fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
 
     call map(s:metrics, { k,v -> s:prettify(v) })
     "                              │
-    "                              └─ • scientific notation for big/small numbers
-    "                                 • remove possible ending `.0`
+    "                              └─ * scientific notation for big/small numbers
+    "                                 * remove possible ending `.0`
 endfu
 
 fu! s:extract_data() abort "{{{1
@@ -158,14 +158,14 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " Non-zero digits (1-9) are always significant.
     " A `0` can be significant or not, depending on its position in the number:
     "
-    "         • in a sequence of 0's at the beginning:    NOT significant
+    "         - in a sequence of 0's at the beginning:    NOT significant
     "
-    "         • somewhere between 2 non-zero digits:          significant
+    "         - somewhere between 2 non-zero digits:          significant
     "
-    "         • in a sequence of 0's at the end
+    "         - in a sequence of 0's at the end
     "           of a number WITH a decimal point:             significant
     "
-    "         • in a sequence of 0's at the end
+    "         - in a sequence of 0's at the end
     "           of a number WITHOUT a decimal point:      need more info
     "}}}
     " NO zero in a sequence of 0's at the beginning of a number can be significant.{{{
@@ -185,8 +185,8 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     "           └┤
     "            └ without additional info, you don't know whether these are significant:
     "
-    "                  • they are     , if the measure is accurate to      1         unit
-    "                  • they are not , if the measure is accurate to only 10 or 100 units
+    "                  - they are     , if the measure is accurate to      1         unit
+    "                  - they are not , if the measure is accurate to only 10 or 100 units
     "}}}
     " Don't use the expression “significant  figures“.{{{
     " Yes, it's very common, even in math, but it's also confusing.
