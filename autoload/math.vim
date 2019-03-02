@@ -183,10 +183,12 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " Because it doesn't help you to position the number on the ruler.  Instead,
     " it merely helps you choose the right ruler (i.e. with the right unit).
     "}}}
-    " What kind of info do I need to tell whether a trailing 0 is significant?{{{
+    " What info do I need to tell whether a trailing 0 is significant in a number without decimal point?{{{
     "
-    " You need to compute how many significant digits the number (aka calculated
-    " result) has.
+    " Your number has been calculated from some expression.
+    " So, we'll call it the “calculated result”.
+    "
+    " You need to compute how many significant digits it has.
     " For example,  you can't tell  whether the  trailing 0s are  significant in
     " this calculated result:
     "
@@ -211,7 +213,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " A computer  would give you  the result  `2.468`, but this  number contains
     " four significant digits, whereas `2.0` only had two.
     "}}}
-    " How does the rule behave with integers?{{{
+    " How does this rule behave with integers?{{{
     "
     " Consider this:
     "
