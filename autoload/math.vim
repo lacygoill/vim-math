@@ -173,9 +173,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     "    - a trailing 0
     "      in a number WITHOUT a decimal point:  need more info
     "}}}
-    " NO leading 0 can be significant.{{{
-    "
-    " Even if it's after the decimal point:
+    " A leading 0 is not significant, even after the decimal point.{{{
     "
     "     0.01
     "       │
