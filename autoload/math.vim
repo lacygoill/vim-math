@@ -135,6 +135,11 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     let integers_product = l:Partial_product(integers)
     let floats_product   = l:Partial_product(floats)
 
+    " Don't use the expression “significant figures“.{{{
+    "
+    " Yes, it's very common, even in math, but it's also confusing.
+    " In math, a figure refers to a geometric shape.
+    "}}}
     " What are significant digits?{{{
     "
     "         http://mathworld.wolfram.com/SignificantDigits.html
@@ -143,74 +148,110 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     " The significant digits of a number are the digits necessary to express the
     " latter within the uncertainty of calculation.
     " Ex:
-    "                     ┌ known quantity
-    "         ┌───────────┤
+    "         ┌ known quantity
+    "         ├───────────┐
     "         1.234 ± 0.002
-    "         └───┤
-    "             └ 4 significant digits
+    "         ├───┘
+    "         └ 4 significant digits
     "
     " My_definition:
     " They  are the digits  which allow you to  position the number  on the
     " “right“ ruler. What is a right ruler?
     " A  ruler, whose  unit allows  you  to express  the number  as an  integer,
-    " without any 0 at the end.
+    " without any trailing 0.
     "
     " Non-zero digits (1-9) are always significant.
     " A `0` can be significant or not, depending on its position in the number:
     "
-    "         - in a sequence of 0's at the beginning:    NOT significant
+    "    - a leading 0:                          NOT significant
     "
-    "         - somewhere between 2 non-zero digits:          significant
+    "    - somewhere between 2 non-zero digits:  significant
     "
-    "         - in a sequence of 0's at the end
-    "           of a number WITH a decimal point:             significant
+    "    - a trailing 0
+    "      in a number WITH a decimal point:     significant
     "
-    "         - in a sequence of 0's at the end
-    "           of a number WITHOUT a decimal point:      need more info
+    "    - a trailing 0
+    "      in a number WITHOUT a decimal point:  need more info
     "}}}
-    " NO zero in a sequence of 0's at the beginning of a number can be significant.{{{
-    " Even if it's after the decimal point.
+    " NO leading 0 can be significant.{{{
+    "
+    " Even if it's after the decimal point:
+    "
+    "     0.01
+    "       │
+    "       └ not significant
     "
     " Why?
     " Because it doesn't help you to position the number on the ruler.  Instead,
-    " it merely helps you to choose the right ruler (i.e. with the right unit).
+    " it merely helps you choose the right ruler (i.e. with the right unit).
     "}}}
-    " How does more info help to determine whether a 0 at the end of a number is significant?{{{
+    " What kind of info do I need to tell whether a trailing 0 is significant?{{{
     "
-    " Additional info can specify the accuracy of the number.
-    " A `0` which gives to the number an accuracy greater than the one specified
-    " by this info is NOT significant.
+    " You need to compute how many significant digits the number (aka calculated
+    " result) has.
+    " For example,  you can't tell  whether the  trailing 0s are  significant in
+    " this calculated result:
     "
-    "         1300
-    "           └┤
-    "            └ without additional info, you don't know whether these are significant:
+    "         12300
+    "            ^^
     "
-    "                  - they are     , if the measure is accurate to      1         unit
-    "                  - they are not , if the measure is accurate to only 10 or 100 units
+    " First, you need to know how it was calculated.
+    " Then, you  can use this  info to compute  how many significant  digits the
+    " calculated result has.
+    " Suppose you compute that the calculated result has 4 significant digits.
+    " It would mean  that the first trailing 0 *is*  significant, but the second
+    " one is *not*.
+    " }}}
+    " How many significant digits should have the result of a multipliation/division?{{{
+    "
+    " As many as the number with the smallest amount of significant digits.
+    "
+    " Example:
+    "
+    "     1.234 × 2.0 = 2.468 ≈ 2.5
+    "
+    " A computer  would give you  the result  `2.468`, but this  number contains
+    " four significant digits, whereas `2.0` only had two.
     "}}}
-    " Don't use the expression “significant  figures“.{{{
-    " Yes, it's very common, even in math, but it's also confusing.
-    " In math, a figure refers to a geometric shape.
-    "}}}
-    " RULE: The result of a product should have as many significant digits{{{
-    " as the number with the smallest amount of significant digits.
-    "}}}
-    " Exception: With integers, the rule can lead to a weird result.{{{
+    " How does the rule behave with integers?{{{
     "
-    " If I follow it, then here's what should be the result of this calculation:
+    " Consider this:
     "
-    "       2 * 2 * 2 * 2 = 20
+    "       2 * 2 * 2 * 2
     "
-    " The result could not be `16`, because the latter has 2 significant digits,
-    " whereas  all our  numbers  have  only 1.   I  suppose  only fractions  are
-    " affected by the rule, not integers…
+    " The result is `16`.
+    "
+    " But `1`  should be  overlined to  express that  it's the  last significant
+    " digit, because all our numbers have only one significant digit.
+    "
+    " To move  the overline to  `6` you would  need measurements which  are more
+    " accurate than `2`, like `2.3` for example.
     "}}}
+    " How many significant digits should have the result of an addition/subtraction?{{{
+    "
+    " Get the position  of the last significant digit –  relative to the decimal
+    " point – in every measured quantity used in the terms of the sum.
+    "
+    " Let `n` be the leftmost position out of all of them.
+    "
+    " The last significant decimal place in the calculated result should be `n`.
+    "
+    " Example:
+    "
+    "     100.0 + 1.234 = 101.234 ≈ 101.2
+    "
+    " The last significant digit in `100.0` is right after the decimal point.
+    " The last significant digit in `1.234` is three places after the decimal point.
+    " The leftmost of them is the one right after the decimal point.
+    " So, the  last significant digit of  the calculated result should  be right
+    " after the decimal point.
+    " }}}
 
     let significant_digits = min(map(floats,
     \                                { i,v -> strlen(substitute(v, '\v^0+|[.+-]', '', 'g')) })
     \                            +[10])
     "                              │
-    "                              └─ never go above 10 significant digits
+    "                              └ never go above 10 significant digits
 
     let floats_product = significant_digits > 0
                      \ ?        printf('%.*f', significant_digits, floats_product)
