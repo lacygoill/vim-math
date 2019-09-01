@@ -29,10 +29,10 @@ fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
     \                 'count' : cnt,
     \               }
 
-    call map(s:metrics, { k,v -> s:prettify(v) })
-    "                              │
-    "                              └─ * scientific notation for big/small numbers
-    "                                 * remove possible ending `.0`
+    call map(s:metrics, {_,v -> s:prettify(v)})
+    "                             │
+    "                             └ * scientific notation for big/small numbers
+    "                               * remove possible ending `.0`
 endfu
 
 fu! s:extract_data() abort "{{{1
