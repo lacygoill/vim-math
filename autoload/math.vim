@@ -39,17 +39,17 @@ fu! s:extract_data() abort "{{{1
     let selection = getreg('"')
     "                                       ┌─ default 2nd argument = \_s\+
     "                                       │
-    let raw_numbers = filter(split(selection), { i,v -> v =~# s:num_pat })
-    let numbers     = map(copy(raw_numbers), { i,v -> str2float(v) })
-    "                                                 │
-    "                                                 └─ Vim's default coercion is good enough for integers
-    "                                                    but not for floats:
+    let raw_numbers = filter(split(selection), {_,v -> v =~# s:num_pat})
+    let numbers     = map(copy(raw_numbers), {_,v -> str2float(v)})
+    "                                                │
+    "                                                └─ Vim's default coercion is good enough for integers
+    "                                                   but not for floats:
     "
-    "                                                    echo '12' + 3
-    "                                                    15    ✔~
+    "                                                   echo '12' + 3
+    "                                                   15    ✔~
     "
-    "                                                    echo '1.2' + 3
-    "                                                    4     ✘~
+    "                                                   echo '1.2' + 3
+    "                                                   4     ✘~
     "
     "                                            … so we need to call `str2float()` to perform the right
     "                                            conversion, from a string to the float it contains.
@@ -112,8 +112,8 @@ fu! s:prettify(number) abort "{{{1
 endfu
 
 fu! s:product(cnt, raw_numbers) abort "{{{1
-    let floats   = filter(copy(a:raw_numbers), { i,v -> v =~# '[.]' })
-    let integers = filter(copy(a:raw_numbers), { i,v -> v !~# '[.]' })
+    let floats   = filter(copy(a:raw_numbers), {_,v -> v =~# '[.]'})
+    let integers = filter(copy(a:raw_numbers), {_,v -> v !~# '[.]'})
 
     " if there's only integers, no need to process the product
     " compute and return immediately
@@ -136,7 +136,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     let floats_product   = l:Partial_product(floats)
 
     let significant_digits = min(map(floats,
-    \                                { i,v -> strlen(substitute(v, '\v^0+|[.+-]', '', 'g')) })
+    \                                {_,v -> strlen(substitute(v, '\v^0+|[.+-]', '', 'g'))})
     \                            +[10])
     "                              │
     "                              └ never go above 10 significant digits
@@ -234,7 +234,7 @@ fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     "         avg(1.2, 3.45) = 2.3      ✔
     "}}}
     let decimal_places = min(map(copy(a:raw_numbers),
-    \                            { i,v -> strlen(matchstr(v, '\.\zs\d\+$')) })
+    \                            {_,v -> strlen(matchstr(v, '\.\zs\d\+$'))})
     \                        +[10])
     "                          │
     "                          └─ never go above 10 digits after the decimal point
