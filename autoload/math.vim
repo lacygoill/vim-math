@@ -98,17 +98,17 @@ fu! math#op(type, ...) abort "{{{1
 endfu
 
 fu! s:prettify(number) abort "{{{1
-    "                          ┌ use scientific notation if the number is too big/small
-    "                         ┌┤
+    "                         ┌ use scientific notation if the number is too big/small
+    "                         ├┐
     return substitute(printf('%g', a:number), '\.0\+$', '', '')
-    "                                          └────┤
-    "                                               └ remove possible ending `.0`
+    "                                          ├────┘
+    "                                          └ remove possible ending `.0`
     "
-    "                                                 `%g` does NOT remove it:
+    "                                            `%g` does NOT remove it:
     "
-    "                                                         123.0
+    "                                                    123.0
     "
-    "                                                 … because it characterizes a float.
+    "                                            … because it characterizes a float.
 endfu
 
 fu! s:product(cnt, raw_numbers) abort "{{{1
