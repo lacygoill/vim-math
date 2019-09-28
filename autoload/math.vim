@@ -37,19 +37,19 @@ endfu
 
 fu! s:extract_data() abort "{{{1
     let selection = getreg('"')
-    "                                       ┌─ default 2nd argument = \_s\+
+    "                                       ┌ default 2nd argument = \_s\+
     "                                       │
     let raw_numbers = filter(split(selection), {_,v -> v =~# s:num_pat})
     let numbers     = map(copy(raw_numbers), {_,v -> str2float(v)})
     "                                                │
-    "                                                └─ Vim's default coercion is good enough for integers
-    "                                                   but not for floats:
+    "                                                └ Vim's default coercion is good enough for integers
+    "                                                  but not for floats:
     "
-    "                                                   echo '12' + 3
-    "                                                   15    ✔~
+    "                                                  echo '12' + 3
+    "                                                  15    ✔~
     "
-    "                                                   echo '1.2' + 3
-    "                                                   4     ✘~
+    "                                                  echo '1.2' + 3
+    "                                                  4     ✘~
     "
     "                                            … so we need to call `str2float()` to perform the right
     "                                            conversion, from a string to the float it contains.
@@ -121,7 +121,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
         return eval(a:cnt ? join(a:raw_numbers, ' * ') : '0')
     endif
 
-    "     ┌─ used to compute the product of integers and floats separately
+    "     ┌ used to compute the product of integers and floats separately
     "     │
     let l:Partial_product = { numbers -> eval(
     \                                            len(numbers) ==# 0
@@ -156,12 +156,12 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
                 " than 4, round it up. As an  example, suppose we have a product
                 " with 3 significant digits:
                 "
-                "           ┌─ smaller than 4
+                "           ┌ smaller than 4
                 "           │
                 "       1.232    →    1.23
                 "       1.238    →    1.24
                 "           │
-                "           └─ greater than 4
+                "           └ greater than 4
                 let floats_product[i] = string(eval(floats_product[i])+(get(floats_product, i+1, 0) <= 4
                 \                                                       ?    0
                 \                                                       :    1))
@@ -237,7 +237,7 @@ fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     \                            {_,v -> strlen(matchstr(v, '\.\zs\d\+$'))})
     \                        +[10])
     "                          │
-    "                          └─ never go above 10 digits after the decimal point
+    "                          └ never go above 10 digits after the decimal point
 
     return decimal_places > 0
        \ ?     printf('%.*f', decimal_places, sum)
