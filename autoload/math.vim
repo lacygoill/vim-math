@@ -12,7 +12,7 @@ fu! s:analyse() abort "{{{1
     "
     " A redraw will erase the message, so we delay the report to be sure it will
     " always be visible.
-    call timer_start(0, { -> s:report() })
+    call timer_start(0, {-> s:report()})
 endfu
 
 fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
@@ -60,7 +60,7 @@ fu! s:get_num_pat() abort "{{{1
     let sign     = '[+-]?'
     let decimal  = '\d+\.?\d*'
     let fraction = '\.\d+'
-    let exponent = '[eE]'.sign.'\d+'
+    let exponent = '[eE]'..sign..'\d+'
     return printf('\v^%s%%(%s|%s)%%(%s)?$', sign, decimal, fraction, exponent)
 endfu
 
@@ -83,7 +83,7 @@ fu! math#op(type, ...) abort "{{{1
         elseif a:type is# 'vis'
             sil norm! gvy
         elseif a:type is# 'Ex'
-            sil exe a:1.','.a:2.'y'
+            sil exe a:1..','..a:2..'y'
         else
             return ''
         endif
@@ -124,9 +124,9 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     "     ┌ used to compute the product of integers and floats separately
     "     │
     let l:Partial_product = { numbers -> eval(
-    \                                            len(numbers) ==# 0
+    \                                            len(numbers) == 0
     \                                          ?     '1'
-    \                                          : len(numbers) ==# 1
+    \                                          : len(numbers) == 1
     \                                          ?     numbers[0]
     \                                          : join(numbers, ' * ')
     \                                        )
@@ -151,7 +151,7 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
         if char isnot# '-' && char isnot# '.'
             if significant_digits <= 0
                 let floats_product[i] = '0'
-            elseif significant_digits ==# 1
+            elseif significant_digits == 1
                 " If the next digit after  the last significant digit is greater
                 " than 4, round it up. As an  example, suppose we have a product
                 " with 3 significant digits:
@@ -190,7 +190,7 @@ fu! math#put_metrics() abort "{{{1
         if choice >= 2 && choice <= 7
             let metrics = ['sum', 'avg', 'prod', 'min', 'max', 'count'][choice - 2]
             let output  = s:metrics[metrics]
-        elseif choice ==# 1
+        elseif choice == 1
             let output = printf('sum: %s   avg: %s   prod: %s   min: %s   max: %s   count: %s',
             \                    s:metrics.sum,
             \                    s:metrics.avg,
@@ -216,7 +216,7 @@ endfu
 fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     let sum = eval(a:cnt ? join(a:raw_numbers, ' + ') : '0')
     if a:avg
-        let sum = (a:cnt !=# 0 ? 1.0 * sum / a:cnt : 0)
+        let sum = (a:cnt != 0 ? 1.0 * sum / a:cnt : 0)
     endif
 
     " RULE: The result of a sum should be as accurate as the least accurate number.{{{
@@ -225,13 +225,13 @@ fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     " places,  and B  to  P2 decimal  places,  the result  must  be accurate  to
     " min(P1,P2) decimal places.
     "
-    "         http://mathforum.org/library/drmath/view/58335.html
+    " http://mathforum.org/library/drmath/view/58335.html
     "
     " So, if we sum several numbers with different precisions, the result should
     " be as accurate as the least accurate number:
     "
-    "         avg(1.2, 3.45) = 2.325    ✘
-    "         avg(1.2, 3.45) = 2.3      ✔
+    "     avg(1.2, 3.45) = 2.325    ✘
+    "     avg(1.2, 3.45) = 2.3      ✔
     "}}}
     let decimal_places = min(map(copy(a:raw_numbers),
     \                            {_,v -> strlen(matchstr(v, '\.\zs\d\+$'))})
