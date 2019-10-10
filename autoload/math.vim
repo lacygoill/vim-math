@@ -12,7 +12,7 @@ fu! s:analyse() abort "{{{1
     "
     " A redraw will erase the message, so we delay the report to be sure it will
     " always be visible.
-    call timer_start(0, {-> s:report()})
+    call timer_start(0, {_ -> s:report()})
 endfu
 
 fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
