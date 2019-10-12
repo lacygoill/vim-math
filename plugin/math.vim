@@ -15,7 +15,7 @@ let g:loaded_math = 1
 
 " Command {{{1
 
-com! -bar -range AnalyseNumbers call math#op('Ex', <line1>, <line2>)
+com -bar -range AnalyseNumbers call math#op('Ex', <line1>, <line2>)
 
 " Mappings {{{1
 

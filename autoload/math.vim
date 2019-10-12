@@ -3,7 +3,7 @@ if exists('g:autoloaded_math')
 endif
 let g:autoloaded_math = 1
 
-fu! s:analyse() abort "{{{1
+fu s:analyse() abort "{{{1
     let [raw_numbers, numbers] = s:extract_data()
     call s:calculate_metrics(raw_numbers, numbers)
     " The cursor may be moved to another line when we use the operator.
@@ -15,7 +15,7 @@ fu! s:analyse() abort "{{{1
     call timer_start(0, {_ -> s:report()})
 endfu
 
-fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
+fu s:calculate_metrics(raw_numbers, numbers) abort "{{{1
     let [raw_numbers, numbers] = [a:raw_numbers, a:numbers]
 
     let cnt = len(numbers)
@@ -35,7 +35,7 @@ fu! s:calculate_metrics(raw_numbers, numbers) abort "{{{1
     "                               * remove possible ending `.0`
 endfu
 
-fu! s:extract_data() abort "{{{1
+fu s:extract_data() abort "{{{1
     let selection = getreg('"')
     "                                       ┌ default 2nd argument = \_s\+
     "                                       │
@@ -56,7 +56,7 @@ fu! s:extract_data() abort "{{{1
     return [raw_numbers, numbers]
 endfu
 
-fu! s:get_num_pat() abort "{{{1
+fu s:get_num_pat() abort "{{{1
     let sign     = '[+-]?'
     let decimal  = '\d+\.?\d*'
     let fraction = '\.\d+'
@@ -66,7 +66,7 @@ endfu
 
 let s:num_pat = s:get_num_pat()
 
-fu! math#op(type, ...) abort "{{{1
+fu math#op(type, ...) abort "{{{1
     let cb_save  = &cb
     let sel_save = &selection
     let reg_save = ['"', getreg('"'), getregtype('"')]
@@ -97,7 +97,7 @@ fu! math#op(type, ...) abort "{{{1
     endtry
 endfu
 
-fu! s:prettify(number) abort "{{{1
+fu s:prettify(number) abort "{{{1
     "                         ┌ use scientific notation if the number is too big/small
     "                         ├┐
     return substitute(printf('%g', a:number), '\.0\+$', '', '')
@@ -111,7 +111,7 @@ fu! s:prettify(number) abort "{{{1
     "                                            … because it characterizes a float.
 endfu
 
-fu! s:product(cnt, raw_numbers) abort "{{{1
+fu s:product(cnt, raw_numbers) abort "{{{1
     let floats   = filter(copy(a:raw_numbers), {_,v -> v =~# '[.]'})
     let integers = filter(copy(a:raw_numbers), {_,v -> v !~# '[.]'})
 
@@ -173,23 +173,34 @@ fu! s:product(cnt, raw_numbers) abort "{{{1
     return string(eval(join(floats_product, '')) * integers_product)
 endfu
 
-fu! math#put_metrics() abort "{{{1
+fu math#put_metrics() abort "{{{1
     try
         if !exists('s:metrics')
             return 'echo "no metrics"'
         endif
 
-        let choice = inputlist(['Metrics',
-        \                       '1. all',
-        \                       '2. sum',
-        \                       '3. avg',
-        \                       '4. prod',
-        \                       '5. min',
-        \                       '6. max',
-        \                       '7. count'])
+        let choices =<< trim END
+            Metrics
+            1. all
+            2. sum
+            3. avg
+            4. prod
+            5. min
+            6. max
+            7. count
+        END
+        let choice = inputlist(choices)
         if choice >= 2 && choice <= 7
-            let metrics = ['sum', 'avg', 'prod', 'min', 'max', 'count'][choice - 2]
-            let output  = s:metrics[metrics]
+            let metrics =<< trim END
+                sum
+                avg
+                prod
+                min
+                max
+                count
+            END
+            let metrics = metrics[choice - 2]
+            let output = s:metrics[metrics]
         elseif choice == 1
             let output = printf('sum: %s   avg: %s   prod: %s   min: %s   max: %s   count: %s',
             \                    s:metrics.sum,
@@ -207,13 +218,13 @@ fu! math#put_metrics() abort "{{{1
     endtry
 endfu
 
-fu! s:report() abort "{{{1
+fu s:report() abort "{{{1
     for a_metrics in ['sum', 'avg', 'prod', 'min', 'max', 'count']
         echon printf('%s: %s   ', a_metrics, s:metrics[a_metrics])
     endfor
 endfu
 
-fu! s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
+fu s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     let sum = eval(a:cnt ? join(a:raw_numbers, ' + ') : '0')
     if a:avg
         let sum = (a:cnt != 0 ? 1.0 * sum / a:cnt : 0)
