@@ -180,24 +180,24 @@ fu math#put_metrics() abort "{{{1
         endif
 
         let choices =<< trim END
-        Metrics
-        1. all
-        2. sum
-        3. avg
-        4. prod
-        5. min
-        6. max
-        7. count
+            Metrics
+            1. all
+            2. sum
+            3. avg
+            4. prod
+            5. min
+            6. max
+            7. count
         END
         let choice = inputlist(choices)
         if choice >= 2 && choice <= 7
             let metrics =<< trim END
-            sum
-            avg
-            prod
-            min
-            max
-            count
+                sum
+                avg
+                prod
+                min
+                max
+                count
             END
             let metrics = metrics[choice - 2]
             let output = s:metrics[metrics]
