@@ -3,6 +3,18 @@ if exists('g:autoloaded_math')
 endif
 let g:autoloaded_math = 1
 
+" Init {{{1
+
+fu s:get_num_pat() abort
+    let sign     = '[+-]\='
+    let decimal  = '\d\+\.\=\d*'
+    let fraction = '\.\d\+'
+    let exponent = '[eE]'..sign..'\d\+'
+    return printf('^%s\%%(%s\|%s\)\%%(%s\)\=$', sign, decimal, fraction, exponent)
+endfu
+
+const s:NUM_PAT = s:get_num_pat()
+
 fu s:analyse() abort "{{{1
     let [raw_numbers, numbers] = s:extract_data()
     call s:calculate_metrics(raw_numbers, numbers)
@@ -39,7 +51,7 @@ fu s:extract_data() abort "{{{1
     let selection = getreg('"')
     "                                       ┌ default 2nd argument = \_s\+
     "                                       │
-    let raw_numbers = filter(split(selection), {_,v -> v =~# s:num_pat})
+    let raw_numbers = filter(split(selection), {_,v -> v =~# s:NUM_PAT})
     let numbers     = map(copy(raw_numbers), {_,v -> str2float(v)})
     "                                                │
     "                                                └ Vim's default coercion is good enough for integers
@@ -55,16 +67,6 @@ fu s:extract_data() abort "{{{1
     "                                            conversion, from a string to the float it contains.
     return [raw_numbers, numbers]
 endfu
-
-fu s:get_num_pat() abort "{{{1
-    let sign     = '[+-]?'
-    let decimal  = '\d+\.?\d*'
-    let fraction = '\.\d+'
-    let exponent = '[eE]'..sign..'\d+'
-    return printf('\v^%s%%(%s|%s)%%(%s)?$', sign, decimal, fraction, exponent)
-endfu
-
-let s:num_pat = s:get_num_pat()
 
 fu math#op(type, ...) abort "{{{1
     let cb_save  = &cb
@@ -136,10 +138,9 @@ fu s:product(cnt, raw_numbers) abort "{{{1
     let floats_product   = l:Partial_product(floats)
 
     let significant_digits = min(map(floats,
-    \                                {_,v -> strlen(substitute(v, '\v^0+|[.+-]', '', 'g'))})
-    \                            +[10])
-    "                              │
-    "                              └ never go above 10 significant digits
+        \ {_,v -> strlen(substitute(v, '^0\+\|[.+-]', '', 'g'))}) + [10])
+        "                                                         │
+        "                                                         └ never go above 10 significant digits
 
     let floats_product = significant_digits > 0
                      \ ?        printf('%.*f', significant_digits, floats_product)
