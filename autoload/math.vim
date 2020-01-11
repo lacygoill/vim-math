@@ -246,10 +246,9 @@ fu s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     "     avg(1.2, 3.45) = 2.3      ✔
     "}}}
     let decimal_places = min(map(copy(a:raw_numbers),
-    \                            {_,v -> strlen(matchstr(v, '\.\zs\d\+$'))})
-    \                        +[10])
-    "                          │
-    "                          └ never go above 10 digits after the decimal point
+        \     {_,v -> strlen(matchstr(v, '\.\zs\d\+$'))}) + [10])
+        "                                                    │
+        "                                                    └ never go above 10 digits after the decimal point
 
     return decimal_places > 0
        \ ?     printf('%.*f', decimal_places, sum)
