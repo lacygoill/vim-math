@@ -19,8 +19,8 @@ com -bar -range AnalyseNumbers call math#op('Ex', <line1>, <line2>)
 
 " Mappings {{{1
 
-nno <silent><unique> +m  :<c-u>set opfunc=math#op<cr>g@
-nno <silent><unique> +mm :<c-u>set opfunc=math#op<bar>exe 'norm! '..v:count1..'g@_'<cr>
-xno <silent><unique> +m  :<c-u>call math#op('vis')<cr>
+nno <silent><unique> -m  :<c-u>set opfunc=math#op<cr>g@
+nno <silent><unique> -mm :<c-u>set opfunc=math#op<bar>exe 'norm! '..v:count1..'g@_'<cr>
+xno <silent><unique> -m  :<c-u>call math#op('vis')<cr>
 
 nno <silent><unique> "?  :<c-u>call math#put_metrics()<cr>
