@@ -91,7 +91,7 @@ fu math#op(type, ...) abort "{{{1
         endif
         call s:analyse()
     catch
-        return lg#catch_error()
+        return lg#catch()
     finally
         let &cb  = cb_save
         let &sel = sel_save
@@ -215,7 +215,7 @@ fu math#put_metrics() abort "{{{1
         endif
         call append('.', output)
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
