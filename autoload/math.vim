@@ -20,7 +20,7 @@ fu s:analyse() abort "{{{1
     call s:calculate_metrics(raw_numbers, numbers)
     " The cursor may be moved to another line when we use the operator.
     " When that  happens, it may cause  a redraw, especially when  we repeat the
-    " operator with the dot command.
+    " operator with the redo command.
     "
     " A redraw will erase the message, so we delay the report to be sure it will
     " always be visible.
