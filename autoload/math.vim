@@ -68,7 +68,12 @@ fu s:extract_data() abort "{{{1
     return [raw_numbers, numbers]
 endfu
 
-fu math#op(type, ...) abort "{{{1
+fu math#op(...) abort "{{{1
+    if !a:0
+        let &opfunc = 'math#op'
+        return 'g@'
+    endif
+    let type = a:1
     let cb_save  = &cb
     let sel_save = &selection
     let reg_save = ['"', getreg('"'), getregtype('"')]
@@ -76,18 +81,12 @@ fu math#op(type, ...) abort "{{{1
         set cb-=unnamed cb-=unnamedplus
         set selection=inclusive
 
-        if a:type is# 'char'
+        if type is# 'char'
             sil norm! `[v`]y
-        elseif a:type is# 'line'
+        elseif type is# 'line'
             sil norm! '[V']y
-        elseif a:type is# 'block'
+        elseif type is# 'block'
             sil exe "norm! `[\<c-v>`]y"
-        elseif a:type is# 'vis'
-            sil norm! gvy
-        elseif a:type is# 'Ex'
-            sil exe a:1..','..a:2..'y'
-        else
-            return ''
         endif
         call s:analyse()
     catch
