@@ -52,19 +52,19 @@ fu s:extract_data() abort "{{{1
     "                                       ┌ default 2nd argument = \_s\+
     "                                       │
     let raw_numbers = filter(split(selection), {_,v -> v =~# s:NUM_PAT})
-    let numbers     = map(copy(raw_numbers), {_,v -> str2float(v)})
-    "                                                │
-    "                                                └ Vim's default coercion is good enough for integers
-    "                                                  but not for floats:
+    let numbers = map(copy(raw_numbers), {_,v -> str2float(v)})
+    "                                            │
+    "                                            └ Vim's default coercion is good enough for integers
+    "                                              but not for floats:
     "
-    "                                                  echo '12' + 3
-    "                                                  15    ✔~
+    "                                              echo '12' + 3
+    "                                              15    ✔~
     "
-    "                                                  echo '1.2' + 3
-    "                                                  4     ✘~
+    "                                              echo '1.2' + 3
+    "                                              4     ✘~
     "
-    "                                            … so we need to call `str2float()` to perform the right
-    "                                            conversion, from a string to the float it contains.
+    "                                        ... so we need to call `str2float()` to perform the right
+    "                                        conversion, from a string to the float it contains.
     return [raw_numbers, numbers]
 endfu
 
@@ -74,12 +74,10 @@ fu math#op(...) abort "{{{1
         return 'g@'
     endif
     let type = a:1
-    let cb_save  = &cb
-    let sel_save = &selection
-    let reg_save = ['"', getreg('"'), getregtype('"')]
+    let [cb_save, sel_save] = [&cb, &sel]
+    let reg_save = getreginfo('"')
     try
-        set cb-=unnamed cb-=unnamedplus
-        set selection=inclusive
+        set cb-=unnamed cb-=unnamedplus sel=inclusive
 
         if type is# 'char'
             sil norm! `[v`]y
@@ -92,9 +90,8 @@ fu math#op(...) abort "{{{1
     catch
         return lg#catch()
     finally
-        let &cb  = cb_save
-        let &sel = sel_save
-        call call('setreg', reg_save)
+        let [&cb, &sel] = [cb_save, sel_save]
+        call setreg('"', reg_save)
     endtry
 endfu
 
@@ -109,7 +106,7 @@ fu s:prettify(number) abort "{{{1
     "
     "                                                    123.0
     "
-    "                                            … because it characterizes a float.
+    "                                            ... because it characterizes a float.
 endfu
 
 fu s:product(cnt, raw_numbers) abort "{{{1
