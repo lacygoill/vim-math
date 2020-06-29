@@ -77,7 +77,7 @@ fu math#op(...) abort "{{{1
     let [cb_save, sel_save] = [&cb, &sel]
     let reg_save = getreginfo('"')
     try
-        set cb-=unnamed cb-=unnamedplus sel=inclusive
+        set cb= sel=inclusive
 
         if type is# 'char'
             sil norm! `[v`]y
