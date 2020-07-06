@@ -15,18 +15,6 @@ endfu
 
 const s:NUM_PAT = s:get_num_pat()
 
-fu s:analyse() abort "{{{1
-    let [raw_numbers, numbers] = s:extract_data()
-    call s:calculate_metrics(raw_numbers, numbers)
-    " The cursor may  be moved to another  line when we use  the operator.  When
-    " that  happens, it  may  cause  a redraw,  especially  when  we repeat  the
-    " operator with the dot command.
-    "
-    " A redraw will erase the message, so we delay the report to be sure it will
-    " always be visible.
-    call timer_start(0, {-> s:report()})
-endfu
-
 fu s:calculate_metrics(raw_numbers, numbers) abort "{{{1
     let [raw_numbers, numbers] = [a:raw_numbers, a:numbers]
 
@@ -68,31 +56,22 @@ fu s:extract_data() abort "{{{1
     return [raw_numbers, numbers]
 endfu
 
-fu math#op(...) abort "{{{1
-    if !a:0
-        let &opfunc = 'math#op'
-        return 'g@'
-    endif
-    let type = a:1
-    let [cb_save, sel_save] = [&cb, &sel]
-    let reg_save = getreginfo('"')
-    try
-        set cb= sel=inclusive
+fu math#op() abort "{{{1
+    let &opfunc = 'lg#opfunc'
+    let g:opfunc_core = 'math#op_core'
+    return 'g@'
+endfu
 
-        if type is# 'char'
-            sil norm! `[v`]y
-        elseif type is# 'line'
-            sil norm! '[V']y
-        elseif type is# 'block'
-            sil exe "norm! `[\<c-v>`]y"
-        endif
-        call s:analyse()
-    catch
-        return lg#catch()
-    finally
-        let [&cb, &sel] = [cb_save, sel_save]
-        call setreg('"', reg_save)
-    endtry
+fu math#op_core(type) abort
+    let [raw_numbers, numbers] = s:extract_data()
+    call s:calculate_metrics(raw_numbers, numbers)
+    " The cursor may  be moved to another  line when we use  the operator.  When
+    " that  happens, it  may  cause  a redraw,  especially  when  we repeat  the
+    " operator with the dot command.
+    "
+    " A redraw will erase the message, so we delay the report to be sure it will
+    " always be visible.
+    call timer_start(0, {-> s:report()})
 endfu
 
 fu s:prettify(number) abort "{{{1
