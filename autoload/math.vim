@@ -58,7 +58,9 @@ endfu
 
 fu math#op() abort "{{{1
     let &opfunc = 'lg#opfunc'
-    let g:opfunc_core = 'math#op_core'
+    let g:opfunc = {
+        \ 'core': 'math#op_core',
+        \ }
     return 'g@'
 endfu
 
