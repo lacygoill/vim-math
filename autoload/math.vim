@@ -5,11 +5,14 @@ let g:autoloaded_math = 1
 
 " Init {{{1
 
+import Catch from 'lg.vim'
+import Opfunc from 'lg.vim' | const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
+
 fu s:get_num_pat() abort
-    let sign     = '[+-]\='
-    let decimal  = '\d\+\.\=\d*'
+    let sign = '[+-]\='
+    let decimal = '\d\+\.\=\d*'
     let fraction = '\.\d\+'
-    let exponent = '[eE]'..sign..'\d\+'
+    let exponent = '[eE]' .. sign .. '\d\+'
     return printf('^%s\%%(%s\|%s\)\%%(%s\)\=$', sign, decimal, fraction, exponent)
 endfu
 
@@ -21,43 +24,43 @@ fu s:calculate_metrics(raw_numbers, numbers) abort "{{{1
     let cnt = len(numbers)
 
     let s:metrics = {
-    \                 'sum'   : str2float(s:sum_or_avg(cnt, raw_numbers, 0)),
-    \                 'avg'   : str2float(s:sum_or_avg(cnt, raw_numbers, 1)),
-    \                 'prod'  : str2float(s:product(cnt, raw_numbers)),
-    \                 'min'   : lg#math#min(numbers),
-    \                 'max'   : lg#math#max(numbers),
-    \                 'count' : cnt,
-    \               }
+        \   'sum': s:sum_or_avg(cnt, raw_numbers, 0)->str2float(),
+        \   'avg': s:sum_or_avg(cnt, raw_numbers, 1)->str2float(),
+        \   'prod': s:product(cnt, raw_numbers)->str2float(),
+        \   'min': lg#math#min(numbers),
+        \   'max': lg#math#max(numbers),
+        \   'count': cnt,
+        \ }
 
-    call map(s:metrics, {_,v -> s:prettify(v)})
-    "                             │
-    "                             └ * scientific notation for big/small numbers
-    "                               * remove possible ending `.0`
+    call map(s:metrics, {_, v -> s:prettify(v)})
+    "                              │
+    "                              └ * scientific notation for big/small numbers
+    "                                * remove possible ending `.0`
 endfu
 
 fu s:extract_data() abort "{{{1
     let selection = getreg('"')
-    "                                       ┌ default 2nd argument = \_s\+
-    "                                       │
-    let raw_numbers = filter(split(selection), {_,v -> v =~# s:NUM_PAT})
-    let numbers = map(copy(raw_numbers), {_,v -> str2float(v)})
-    "                                            │
-    "                                            └ Vim's default coercion is good enough for integers
-    "                                              but not for floats:
+    "                                ┌ default 2nd argument = \_s\+
+    "                                │
+    let raw_numbers = split(selection)->filter({_, v -> v =~# s:NUM_PAT})
+    let numbers = copy(raw_numbers)->map({_, v -> str2float(v)})
+    "                                             │
+    "                                             └ Vim's default coercion is good enough for integers
+    "                                               but not for floats:
     "
-    "                                              echo '12' + 3
-    "                                              15    ✔~
+    "                                               echo '12' + 3
+    "                                               15    ✔~
     "
-    "                                              echo '1.2' + 3
-    "                                              4     ✘~
+    "                                               echo '1.2' + 3
+    "                                               4     ✘~
     "
-    "                                        ... so we need to call `str2float()` to perform the right
-    "                                        conversion, from a string to the float it contains.
+    "                                         ... so we need to call `str2float()` to perform the right
+    "                                         conversion, from a string to the float it contains.
     return [raw_numbers, numbers]
 endfu
 
 fu math#op() abort "{{{1
-    let &opfunc = 'lg#opfunc'
+    let &opfunc = s:SID .. 'Opfunc'
     let g:opfunc = {
         \ 'core': 'math#op_core',
         \ }
@@ -77,9 +80,9 @@ fu math#op_core(type) abort
 endfu
 
 fu s:prettify(number) abort "{{{1
-    "                         ┌ use scientific notation if the number is too big/small
-    "                         ├┐
-    return substitute(printf('%g', a:number), '\.0\+$', '', '')
+    "              ┌ use scientific notation if the number is too big/small
+    "              ├┐
+    return printf('%g', a:number)->substitute('\.0\+$', '', '')
     "                                          ├────┘
     "                                          └ remove possible ending `.0`
     "
@@ -91,8 +94,8 @@ fu s:prettify(number) abort "{{{1
 endfu
 
 fu s:product(cnt, raw_numbers) abort "{{{1
-    let floats   = filter(copy(a:raw_numbers), {_,v -> v =~# '[.]'})
-    let integers = filter(copy(a:raw_numbers), {_,v -> v !~# '[.]'})
+    let floats = copy(a:raw_numbers)->filter({_, v -> v =~# '[.]'})
+    let integers = copy(a:raw_numbers)->filter({_, v -> v !~# '[.]'})
 
     " if there's only integers, no need to process the product
     " compute and return immediately
@@ -103,25 +106,24 @@ fu s:product(cnt, raw_numbers) abort "{{{1
     "     ┌ used to compute the product of integers and floats separately
     "     │
     let l:Partial_product = { numbers -> eval(
-    \                                            len(numbers) == 0
-    \                                          ?     '1'
-    \                                          : len(numbers) == 1
-    \                                          ?     numbers[0]
-    \                                          : join(numbers, ' * ')
-    \                                        )
-    \                       }
+        \     len(numbers) == 0
+        \   ?     '1'
+        \   : len(numbers) == 1
+        \   ?     numbers[0]
+        \   : join(numbers, ' * ')
+        \ )}
 
     let integers_product = l:Partial_product(integers)
-    let floats_product   = l:Partial_product(floats)
+    let floats_product = l:Partial_product(floats)
 
-    let significant_digits = min(map(floats,
-        \ {_,v -> strlen(substitute(v, '^0\+\|[.+-]', '', 'g'))}) + [10])
-        "                                                         │
-        "                                                         └ never go above 10 significant digits
+    let significant_digits = (map(floats, {_, v ->
+        \ substitute(v, '^0\+\|[.+-]', '', 'g')->strlen()}) + [10])->min()
+        "                                                      │
+        "                                                      └ never go above 10 significant digits
 
     let floats_product = significant_digits > 0
-                     \ ?        printf('%.*f', significant_digits, floats_product)
-                     \ :        string(floats_product)
+        \ ?        printf('%.*f', significant_digits, floats_product)
+        \ :        string(floats_product)
 
     let floats_product = split(floats_product, '\zs')
     let i = 0
@@ -131,7 +133,7 @@ fu s:product(cnt, raw_numbers) abort "{{{1
                 let floats_product[i] = '0'
             elseif significant_digits == 1
                 " If the next digit after  the last significant digit is greater
-                " than 4, round it up. As an  example, suppose we have a product
+                " than 4, round it up.  As an example, suppose we have a product
                 " with 3 significant digits:
                 "
                 "           ┌ smaller than 4
@@ -140,15 +142,15 @@ fu s:product(cnt, raw_numbers) abort "{{{1
                 "       1.238    →    1.24
                 "           │
                 "           └ greater than 4
-                let floats_product[i] = string(eval(floats_product[i])+(get(floats_product, i+1, 0) <= 4
-                \                                                       ?    0
-                \                                                       :    1))
+                let floats_product[i] = (eval(floats_product[i])
+                    \ + (get(floats_product, i + 1, 0) <= 4 ? 0 : 1))
+                    \ ->string()
             endif
             let significant_digits -= 1
         endif
         let i += 1
     endfor
-    return string(eval(join(floats_product, '')) * integers_product)
+    return (join(floats_product, '')->eval() * integers_product)->string()
 endfu
 
 fu math#put_metrics() abort "{{{1
@@ -181,18 +183,18 @@ fu math#put_metrics() abort "{{{1
             let output = s:metrics[metrics]
         elseif choice == 1
             let output = printf('sum: %s   avg: %s   prod: %s   min: %s   max: %s   count: %s',
-            \                    s:metrics.sum,
-            \                    s:metrics.avg,
-            \                    s:metrics.prod,
-            \                    s:metrics.min,
-            \                    s:metrics.max,
-            \                    s:metrics.count)
+                \ s:metrics.sum,
+                \ s:metrics.avg,
+                \ s:metrics.prod,
+                \ s:metrics.min,
+                \ s:metrics.max,
+                \ s:metrics.count)
         else
             return ''
         endif
         call append('.', output)
     catch
-        return lg#catch()
+        return s:Catch()
     endtry
 endfu
 
@@ -222,12 +224,12 @@ fu s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     "     avg(1.2, 3.45) = 2.325    ✘
     "     avg(1.2, 3.45) = 2.3      ✔
     "}}}
-    let decimal_places = min(map(copy(a:raw_numbers),
-        \     {_,v -> strlen(matchstr(v, '\.\zs\d\+$'))}) + [10])
-        "                                                    │
-        "                                                    └ never go above 10 digits after the decimal point
+    let decimal_places = (copy(a:raw_numbers)
+        \ ->map({_, v -> matchstr(v, '\.\zs\d\+$')->strlen()}) + [10])->min()
+        "                                                         │
+        "                                                         └ never go above 10 digits after the decimal point
 
     return decimal_places > 0
-       \ ?     printf('%.*f', decimal_places, sum)
-       \ :     printf('%d', float2nr(round(sum)))
+        \ ?     printf('%.*f', decimal_places, sum)
+        \ :     round(sum)->float2nr()->printf('%d')
 endfu
