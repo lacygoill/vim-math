@@ -7,6 +7,7 @@ let g:autoloaded_math = 1
 
 import Catch from 'lg.vim'
 import Opfunc from 'lg.vim' | const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
+import {Max, Min} from 'lg/math.vim'
 
 fu s:get_num_pat() abort
     let sign = '[+-]\='
@@ -27,8 +28,8 @@ fu s:calculate_metrics(raw_numbers, numbers) abort "{{{1
         \   'sum': s:sum_or_avg(cnt, raw_numbers, 0)->str2float(),
         \   'avg': s:sum_or_avg(cnt, raw_numbers, 1)->str2float(),
         \   'prod': s:product(cnt, raw_numbers)->str2float(),
-        \   'min': lg#math#min(numbers),
-        \   'max': lg#math#max(numbers),
+        \   'min': s:Min(numbers),
+        \   'max': s:Max(numbers),
         \   'count': cnt,
         \ }
 
