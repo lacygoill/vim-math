@@ -5,9 +5,9 @@ let g:autoloaded_math = 1
 
 " Init {{{1
 
-import Catch from 'lg.vim'
-import Opfunc from 'lg.vim' | const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
+import {Catch, Opfunc} from 'lg.vim'
 import {Max, Min} from 'lg/math.vim'
+const s:SID = execute('fu s:Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
 
 fu s:get_num_pat() abort
     let sign = '[+-]\='
