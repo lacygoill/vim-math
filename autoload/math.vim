@@ -114,8 +114,8 @@ fu s:product(cnt, raw_numbers) abort "{{{1
         \   : join(numbers, ' * ')
         \ )}
 
-    let integers_product = l:Partial_product(integers)
-    let floats_product = l:Partial_product(floats)
+    let integers_product = Partial_product(integers)
+    let floats_product = Partial_product(floats)
 
     let significant_digits = (map(floats, {_, v ->
         \ substitute(v, '^0\+\|[.+-]', '', 'g')->strlen()}) + [10])->min()
