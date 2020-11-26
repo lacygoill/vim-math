@@ -23,4 +23,4 @@ nno <expr><unique> -m  math#op()
 nno <expr><unique> -mm math#op() .. '_'
 xno <expr><unique> -m  math#op()
 
-nno <silent><unique> "? :<c-u>call math#put_metrics()<cr>
+nno <unique> "? <cmd>call math#put_metrics()<cr>
