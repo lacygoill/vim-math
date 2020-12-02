@@ -44,19 +44,19 @@ fu s:extract_data() abort "{{{1
     "                                ┌ default 2nd argument = \_s\+
     "                                │
     let raw_numbers = split(selection)->filter({_, v -> v =~# s:NUM_PAT})
-    let numbers = copy(raw_numbers)->map({_, v -> str2float(v)})
-    "                                             │
-    "                                             └ Vim's default coercion is good enough for integers
-    "                                               but not for floats:
+    let numbers = mapnew(raw_numbers, {_, v -> str2float(v)})
+    "                                          │
+    "                                          └ Vim's default coercion is good enough for integers
+    "                                            but not for floats:
     "
-    "                                               echo '12' + 3
-    "                                               15    ✔~
+    "                                            echo '12' + 3
+    "                                            15    ✔~
     "
-    "                                               echo '1.2' + 3
-    "                                               4     ✘~
+    "                                            echo '1.2' + 3
+    "                                            4     ✘~
     "
-    "                                         ... so we need to call `str2float()` to perform the right
-    "                                         conversion, from a string to the float it contains.
+    "                                      ... so we need to call `str2float()` to perform the right
+    "                                      conversion, from a string to the float it contains.
     return [raw_numbers, numbers]
 endfu
 
@@ -101,21 +101,11 @@ fu s:product(cnt, raw_numbers) abort "{{{1
     " if there's only integers, no need to process the product
     " compute and return immediately
     if empty(floats)
-        return eval(a:cnt ? join(a:raw_numbers, ' * ') : '0')
+        return a:cnt ? reduce(a:raw_numbers, {a, v -> a * v}, 1) : 0
     endif
 
-    "     ┌ used to compute the product of integers and floats separately
-    "     │
-    let l:Partial_product = { numbers -> eval(
-        \     len(numbers) == 0
-        \   ?     '1'
-        \   : len(numbers) == 1
-        \   ?     numbers[0]
-        \   : join(numbers, ' * ')
-        \ )}
-
-    let integers_product = Partial_product(integers)
-    let floats_product = Partial_product(floats)
+    let integers_product = reduce(integers, {a, v -> a * v}, 1)
+    let floats_product = reduce(floats, {a, v -> a * str2float(v)}, 1.0)
 
     let significant_digits = (map(floats, {_, v ->
         \ substitute(v, '^0\+\|[.+-]', '', 'g')->strlen()}) + [10])->min()
@@ -151,7 +141,7 @@ fu s:product(cnt, raw_numbers) abort "{{{1
         endif
         let i += 1
     endfor
-    return (join(floats_product, '')->eval() * integers_product)->string()
+    return (join(floats_product, '')->str2float() * integers_product)->string()
 endfu
 
 fu math#put_metrics() abort "{{{1
@@ -206,7 +196,7 @@ fu s:report() abort "{{{1
 endfu
 
 fu s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
-    let sum = eval(a:cnt ? join(a:raw_numbers, ' + ') : '0')
+    let sum = reduce(a:raw_numbers, {a, v -> a + v}, 0)
     if a:avg
         let sum = (a:cnt != 0 ? 1.0 * sum / a:cnt : 0)
     endif
@@ -225,10 +215,10 @@ fu s:sum_or_avg(cnt, raw_numbers, avg) abort "{{{1
     "     avg(1.2, 3.45) = 2.325    ✘
     "     avg(1.2, 3.45) = 2.3      ✔
     "}}}
-    let decimal_places = (copy(a:raw_numbers)
-        \ ->map({_, v -> matchstr(v, '\.\zs\d\+$')->strlen()}) + [10])->min()
-        "                                                         │
-        "                                                         └ never go above 10 digits after the decimal point
+    let decimal_places = (mapnew(a:raw_numbers,
+        \ {_, v -> matchstr(v, '\.\zs\d\+$')->strlen()}) + [10])->min()
+        "                                                   │
+        "                                                   └ never go above 10 digits after the decimal point
 
     return decimal_places > 0
         \ ?     printf('%.*f', decimal_places, sum)
