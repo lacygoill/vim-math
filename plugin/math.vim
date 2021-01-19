@@ -15,7 +15,7 @@ var loaded = true
 
 # Command {{{1
 
-com -bar -range AnalyseNumbers math#op(<line1>, <line2>)
+com -bar -range AnalyseNumbers math#Ex(<line1>, <line2>)
 
 # Mappings {{{1
 

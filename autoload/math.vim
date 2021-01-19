@@ -40,6 +40,18 @@ def math#opCore(_: any)
     timer_start(0, () => Report())
 enddef
 
+def math#Ex(lnum1: number, lnum2: number) #{{{2
+    var unnamed_save: dict<any> = getreginfo('"')
+    var zero_save: dict<any> = getreginfo('0')
+    try
+        exe 'sil :' .. lnum1 .. ',' .. lnum2 .. 'y'
+        math#opCore('')
+    finally
+        setreg('"', unnamed_save)
+        setreg('0', zero_save)
+    endtry
+enddef
+
 def math#putMetrics() #{{{2
     try
         if metrics == {}
@@ -205,9 +217,9 @@ def Report() #{{{2
 enddef
 
 def SumOrAvg(cnt: number, raw_numbers: list<string>, avg: number): string #{{{2
-    var sum: float = reduce(raw_numbers, (a, v) => a + v->str2float(), 0)
+    var sum: float = reduce(raw_numbers, (a, v) => a + v->str2float(), 0.0)
     if avg != 0
-        sum = (cnt != 0 ? 1.0 * sum / cnt : 0)
+        sum = (cnt != 0 ? 1.0 * sum / cnt : 0.0)
     endif
 
     # RULE: The result of a sum should be as accurate as the least accurate number.{{{
