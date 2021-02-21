@@ -5,8 +5,16 @@ var loaded = true
 
 # Init {{{1
 
-import {Catch, Opfunc} from 'lg.vim'
-import {Max, Min} from 'lg/math.vim'
+import {
+    Catch,
+    Opfunc,
+    } from 'lg.vim'
+
+import {
+    Max,
+    Min,
+    } from 'lg/math.vim'
+
 const SID: string = execute('fu Opfunc')->matchstr('\C\<def\s\+\zs<SNR>\d\+_')
 
 def GetNumPat(): string
@@ -113,10 +121,10 @@ def CalculateMetrics(raw_numbers: list<string>, numbers: list<float>) #{{{2
           count: cnt,
         }
 
-    map(metrics, (_, v) => Prettify(v))
-    #                      │
-    #                      └ * scientific notation for big/small numbers
-    #                        * remove possible ending `.0`
+    map(metrics, (_, v: any): string => Prettify(v))
+    #                                   │
+    #                                   └ * scientific notation for big/small numbers
+    #                                     * remove possible ending `.0`
 enddef
 
 var metrics: dict<any>
@@ -126,7 +134,7 @@ def ExtractData(): list<list<any>> #{{{2
     #                                              ┌ default 2nd argument = \_s\+
     #                                              │
     var raw_numbers: list<string> = split(selection)
-        ->filter((_, v) => v =~ NUM_PAT)
+        ->filter((_, v: string): bool => v =~ NUM_PAT)
     # Vim's default coercion is good enough for integers but not for floats:{{{
     #
     #       echo '12' + 3
@@ -138,7 +146,7 @@ def ExtractData(): list<list<any>> #{{{2
     # ... so we need to call `str2float()` to perform the right conversion, from
     # a string to the float it contains.
     #}}}
-    var numbers: list<float> = mapnew(raw_numbers, (_, v) => str2float(v))
+    var numbers: list<float> = mapnew(raw_numbers, (_, v: string): float => str2float(v))
     return [raw_numbers, numbers]
 enddef
 
@@ -157,22 +165,24 @@ def Prettify(number: any): string #{{{2
 enddef
 
 def Product(cnt: number, raw_numbers: list<string>): string #{{{2
-    var floats: list<string> = copy(raw_numbers)->filter((_, v) => v =~ '[.]')
-    var integers: list<string> = copy(raw_numbers)->filter((_, v) => v !~ '[.]')
+    var floats: list<string> = copy(raw_numbers)->filter((_, v: string): bool => v =~ '[.]')
+    var integers: list<string> = copy(raw_numbers)->filter((_, v: string): bool => v !~ '[.]')
 
-    # if there's only integers, no need to process the product
-    # compute and return immediately
+    # If there  are only integers, no  need to process the  product; compute and
+    # return immediately.
     if empty(floats)
         return cnt != 0
-            ? reduce(raw_numbers, (a, v) => a->str2nr() * v->str2nr(), 1)->string()
+            ? reduce(raw_numbers, (a: number, v: string) => a * v->str2nr(), 1)->string()
             : '0'
     endif
 
-    var integers_product: number = reduce(integers, (a, v) => a->str2nr() * v->str2nr(), 1)
-    var floats_product: float = reduce(floats, (a, v) => a * v->str2float(), 1.0)
+    var integers_product: number = integers
+        ->reduce((a: number, v: string): number => a * v->str2nr(), 1)
+    var floats_product: float = floats
+        ->reduce((a: float, v: string): float => a * v->str2float(), 1.0)
 
     var significant_digits: number = (
-        mapnew(floats, (_, v) =>
+        mapnew(floats, (_, v: string): number =>
             substitute(v, '^0\+\|[.+-]', '', 'g')->strlen()
             # never go above 10 significant digits
         ) + [10]
@@ -217,7 +227,8 @@ def Report() #{{{2
 enddef
 
 def SumOrAvg(cnt: number, raw_numbers: list<string>, avg: number): string #{{{2
-    var sum: float = reduce(raw_numbers, (a, v) => a + v->str2float(), 0.0)
+    var sum: float = raw_numbers
+        ->reduce((a: float, v: string): float => a + v->str2float(), 0.0)
     if avg != 0
         sum = (cnt != 0 ? 1.0 * sum / cnt : 0.0)
     endif
@@ -236,10 +247,11 @@ def SumOrAvg(cnt: number, raw_numbers: list<string>, avg: number): string #{{{2
     #     avg(1.2, 3.45) = 2.325    ✘
     #     avg(1.2, 3.45) = 2.3      ✔
     #}}}
-    var decimal_places: number = (mapnew(raw_numbers,
-        (_, v) => matchstr(v, '\.\zs\d\+$')->strlen()) + [10])->min()
-        #                                                 │
-        #                                                 └ never go above 10 digits after the decimal point
+    var decimal_places: number = (
+        mapnew(raw_numbers, (_, v: string): number => matchstr(v, '\.\zs\d\+$')->strlen())
+        # never go above 10 digits after the decimal point
+        + [10]
+        )->min()
 
     return decimal_places > 0
         ?     printf('%.*f', decimal_places, sum)
