@@ -34,7 +34,7 @@ def math#op(): string #{{{2
     return 'g@'
 enddef
 
-def math#opCore(_: any)
+def math#opCore(_a: any)
     var raw_numbers: list<any>
     var numbers: list<any>
     [raw_numbers, numbers] = ExtractData()
@@ -119,12 +119,10 @@ def CalculateMetrics(raw_numbers: list<string>, numbers: list<float>) #{{{2
           min: Min(numbers),
           max: Max(numbers),
           count: cnt,
-        }
-
-    map(metrics, (_, v: any): string => Prettify(v))
-    #                                   │
-    #                                   └ * scientific notation for big/small numbers
-    #                                     * remove possible ending `.0`
+        }->map((_, v: any): string => Prettify(v))
+        #                             │
+        #                             └ * scientific notation for big/small numbers
+        #                               * remove possible ending `.0`
 enddef
 
 var metrics: dict<any>
@@ -146,7 +144,8 @@ def ExtractData(): list<list<any>> #{{{2
     # ... so we need to call `str2float()` to perform the right conversion, from
     # a string to the float it contains.
     #}}}
-    var numbers: list<float> = mapnew(raw_numbers, (_, v: string): float => str2float(v))
+    var numbers: list<float> = raw_numbers
+        ->mapnew((_, v: string): float => str2float(v))
     return [raw_numbers, numbers]
 enddef
 
@@ -165,15 +164,19 @@ def Prettify(number: any): string #{{{2
 enddef
 
 def Product(cnt: number, raw_numbers: list<string>): string #{{{2
-    var floats: list<string> = copy(raw_numbers)->filter((_, v: string): bool => v =~ '[.]')
-    var integers: list<string> = copy(raw_numbers)->filter((_, v: string): bool => v !~ '[.]')
+    var floats: list<string> = copy(raw_numbers)
+        ->filter((_, v: string): bool => v =~ '[.]')
+    var integers: list<string> = copy(raw_numbers)
+        ->filter((_, v: string): bool => v !~ '[.]')
 
     # If there  are only integers, no  need to process the  product; compute and
     # return immediately.
     if empty(floats)
         return cnt != 0
-            ? reduce(raw_numbers, (a: number, v: string) => a * v->str2nr(), 1)->string()
-            : '0'
+            ?     raw_numbers
+                    ->reduce((a: number, v: string) => a * v->str2nr(), 1)
+                    ->string()
+            :     '0'
     endif
 
     var integers_product: number = integers
@@ -182,10 +185,12 @@ def Product(cnt: number, raw_numbers: list<string>): string #{{{2
         ->reduce((a: float, v: string): float => a * v->str2float(), 1.0)
 
     var significant_digits: number = (
-        mapnew(floats, (_, v: string): number =>
-            substitute(v, '^0\+\|[.+-]', '', 'g')->strlen()
-            # never go above 10 significant digits
-        ) + [10]
+        floats
+            ->mapnew((_, v: string): number =>
+                v->substitute('^0\+\|[.+-]', '', 'g')->strlen()
+            )
+        # never go above 10 significant digits
+        + [10]
     )->min()
 
     var string_float_product: string = significant_digits > 0
@@ -247,11 +252,13 @@ def SumOrAvg(cnt: number, raw_numbers: list<string>, avg: number): string #{{{2
     #     avg(1.2, 3.45) = 2.325    ✘
     #     avg(1.2, 3.45) = 2.3      ✔
     #}}}
-    var decimal_places: number = (
-        mapnew(raw_numbers, (_, v: string): number => matchstr(v, '\.\zs\d\+$')->strlen())
+    var decimal_places: number = min(
+        raw_numbers->mapnew(
+            (_, v: string): number => matchstr(v, '\.\zs\d\+$')->strlen()
+        )
         # never go above 10 digits after the decimal point
         + [10]
-        )->min()
+    )
 
     return decimal_places > 0
         ?     printf('%.*f', decimal_places, sum)
